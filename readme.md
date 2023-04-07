@@ -6,7 +6,7 @@
 - [Join __Total.js Telegram__](https://t.me/totalplatform)
 - [Support](https://www.totaljs.com/support/)
 
-This repository contains only the Total.js Flow editor. It can be used as a centralized Flow editor for special cases. Our instance works on the https://flow.totaljs.com.
+This repository contains only the Total.js Flow editor. It can be used as a centralized Flow editor for special cases. Our instance runs on <https://flow.totaljs.com>.
 
 __Query arguments__:
 
