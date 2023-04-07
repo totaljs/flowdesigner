@@ -1,0 +1,112 @@
+<ui-component name="box" path="common.form" config="if:~PATH~;icon:ti ti-object-group;autofocus:true;reload:?/reload;scrollbar:1;submit:?/submit;width:800" class="hidden" plugin="~PATH~">
+	<div class="padding bg-smoke npb">
+		<div class="grid-2">
+			<div class="m">
+				<ui-component name="input" path="?.name" config="required:1" default="''">@(Name)</ui-component>
+				<div class="help">@(Enter FlowStream name)</div>
+			</div>
+			<div class="m">
+				<ui-component name="input" path="?.url" default="'https://'">@(URL address for support)</ui-component>
+				<div class="help">@(Optional, you can enter the URL address for support)</div>
+			</div>
+		</div>
+	</div>
+	<div class="padding npb">
+
+		<div class="row">
+			<div class="col-md-3 m">
+				<ui-component name="input" path="?.group" config="dirsource:common.groupsform;dircustom:1;dirempty:@(Empty);dirminwidth:300;dirplaceholder:@(Choose or enter new)">@(Group)</ui-component>
+			</div>
+			<div class="col-md-3 m">
+				<ui-component name="input" path="?.reference" config="align:1">@(Reference)</ui-component>
+			</div>
+			<div class="col-md-3 m">
+				<ui-component name="input" path="?.version" config="align:1">@(Version)</ui-component>
+			</div>
+			<div class="col-md-3 m">
+				<ui-component name="input" path="?.author" config="align:1">@(Author)</ui-component>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-3 m">
+				<ui-component name="input" path="?.icon" config="required:1;type:icon" default="'ti ti-microchip'">@(Icon)</ui-component>
+			</div>
+			<div class="col-md-3 m">
+				<ui-component name="input" path="?.color" config="type:color">@(Color)</ui-component>
+			</div>
+			<div class="col-md-6">
+				<ui-component name="input" path="?.proxypath" config="placeholder:@(/users/)"><i class="ti ti-server"></i><b>@(Proxy endpoint)</b></ui-component>
+				<div class="help">@(It will route all incoming requests to this FlowStream.)</div>
+			</div>
+		</div>
+		<hr />
+		<div class="row">
+			<div class="col-md-3 m">
+				<ui-component name="input" path="?.memory" config="type:number" default="0">@(Max. memory)</ui-component>
+			</div>
+			<div class="col-md-9 m">
+				<div class="message message-alert"><i class="ti ti-microchip"></i>@(Maximum memory limit must be defined in megabytes. Memory management for a worker process. Zero (<b>0</b>) means auto memory limit.)</div>
+			</div>
+		</div>
+	</div>
+	<hr class="nmb nmt" />
+	<div class="padding">
+		<div class="ui-input-label">@(Additional information):</div>
+		<ui-component name="codemirror" path="?.readme" config="minheight:300;parent:auto;margin:490;monospace:1;type:markdown;linenumbers:0"></ui-component>
+		<div class="help">@(Markdown format)</div>
+	</div>
+	<nav>
+		<ui-component name="validate" path="?">
+			<button name="submit" disabled><i class="ti ti-check-circle"></i>@(SUBMIT)</button>
+			<button name="cancel">@(Cancel)</button>
+		</ui-component>
+	</nav>
+</ui-component>
+
+<script>
+
+	PLUGIN(function(exports) {
+
+		exports.reload = function(com) {
+			var model = exports.model;
+			var id = model ? model.id : null;
+			com.reconfigure({ title: id ? '@(Update FlowStream)' : '@(Add FlowStream)' });
+		};
+
+		exports.submit = function(hide) {
+
+			var model = CLONE(exports.form);
+
+			if (model.proxypath) {
+				if (model.proxypath.charAt(0) !== '/')
+					model.proxypath = '/' + model.proxypath;
+				if (model.proxypath.charAt(model.proxypath.length - 1) !== '/')
+					model.proxypath += '/';
+
+				var error;
+				for (var i = 0; i < common.items.length; i++) {
+					var item = common.items[i];
+					if (item.id === model.id)
+						continue;
+					if (item.proxypath && (item.proxypath === model.proxypath || item.proxypath.startsWith(model.proxypath) || model.proxypath.startsWith(item.proxypath))) {
+						error = '@(Invalid endpoint) <span class="link">{0}</span>.<br>@(Overlapping with <span class="link">{1}</span> used by <b>{2}</b>)'.format(model.proxypath, item.proxypath, item.name);
+						break;
+					}
+				}
+
+				if (error) {
+					EXEC('-message/warning', error);
+					return;
+				}
+			}
+
+			exports.tapi('streams_save ERROR', model, function() {
+				EXEC('common/refresh');
+				hide();
+			});
+		};
+
+	});
+
+</script>

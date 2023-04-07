@@ -1,0 +1,31 @@
+<div>
+	<ui-bind config="exec:renderconsolelog">
+		<pre style="padding:0 10px;font-size:11px" class="monospace"></pre>
+	</ui-bind>
+</div>
+
+<script>
+	function renderconsolelog(value, path, el) {
+
+		var scrollbar = el.closest('.noscrollbar')[0];
+		var scrolling = false;
+
+		$(scrollbar).on('scroll', function() {
+			if (!scrolling)
+				setTimeout(() => scrolling = false, 5000);
+			scrolling = true;
+		});
+
+		var refresh = function() {
+			if (!HIDDEN(el)) {
+				WAPI('console', function(response) {
+					el.find('pre').html(response.encode());
+					if (!scrolling)
+						scrollbar.scrollTop = scrollbar.scrollHeight;
+					setTimeout(refresh, 2000);
+				});
+			}
+		};
+		refresh();
+	}
+</script>

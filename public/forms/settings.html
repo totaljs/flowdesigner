@@ -1,0 +1,119 @@
+<ui-component name="box" path="common.form" config="if:~PATH~;icon:cog;title:@(Settings);autofocus:true;scrollbar:1;submit:?/submit;width:740;scrollbarshadow:1" class="hidden" plugin="~PATH~">
+	<div>
+		<div class="padding npb">
+
+			<ui-component name="choose" path="?.env" config="selector:div" class="iconmenu">
+				<div class="pointer" data-id="dev">
+					<i class="ti ti-bug"></i>
+					<span>@(Dev)</span>
+				</div>
+				<div class="pointer" data-id="test">
+					<i class="ti ti-flask"></i>
+					<span>@(Test)</span>
+				</div>
+				<div class="pointer" data-id="prod">
+					<i class="ti ti-globe"></i>
+					<span>@(Prod)</span>
+				</div>
+			</ui-component>
+			<div class="clearfix">&nbsp;</div>
+			<div class="message message-alert m"><i class="ti ti-exclamation-triangle"></i><b>@(IMPORTANT:)</b><br />@(All existing FlowStreams will be restarted automatically after changing environment.)</div>
+		</div>
+		<hr />
+		<div class="padding npt">
+
+			<ui-component name="input" path="?.name" config="required:1;innerlabel:1" default="document.title" class="m">@(Name)</ui-component>
+			<div class="row">
+				<div class="col-md-6 m">
+					<ui-component name="input" path="?.components" config="required:1;innerlabel:1;type:url">@(Main components)</ui-component>
+					<div class="help">@(We don't recommend to change it)</div>
+				</div>
+				<div class="col-md-6 m">
+					<ui-component name="input" path="?.components2" config="type:url;innerlabel:1;placeholder:@(URL address to list of components)">@(Custom components)</ui-component>
+					<div class="help"><a href="https://github.com/totaljs/flowstreamcomponents/blob/main/db.json" target="_blank"><i class="ti ti-link"></i>@(Follow this file structure)</a></div>
+				</div>
+			</div>
+
+			<hr class="nmt" />
+			<p class="fs12">@(The access token allows you to access to <b>private</b> directory from the internet on the <b>/private/?token=YOUR_TOKEN</b> endpoint).</p>
+			<ui-component name="input" path="?.token" config="camouflage:1;innerlabel:1;placeholder:@(Enter access token)">@(Access token)</ui-component>
+			<div class="help"><span class="link exec" data-exec="?/generate"><i class="ti ti-qrcode-alt"></i>@(Generate token)</span></div>
+			<hr />
+			<ui-component name="checkbox" path="?.notify">@(Enable <b>/notify/</b> endpoint for external data synchronization)</ui-component>
+			<ui-component name="checkbox" path="?.backup">@(Backup Flow database file after each change)</ui-component>
+			<ui-component name="checkbox" path="?.darkmode">@(Enable dark mode)</ui-component>
+
+			<div class="caption m" style="margin-top:15px">
+				<label><i class="ti ti-totaljs green"></i>Total.js OpenPlatform</label>
+			</div>
+
+			<p>@(The application is designed to work with the Total.js OpenPlatform. First, you must obtain tokens from the application registration form in the OpenPlatform instance.)</p>
+
+			<div class="m">
+				<p>@(You can easily import this app into the OpenPlatform. Copy the link below and paste it into the Importing form in the OpenPlatform.)</p>
+				<ui-bind path="location.origin" config="text span" class="block fs12">
+					<a href="/openplatform.json" target="_blank"><i class="ti ti-globe mr5"></i><span></span>/openplatform.json</a>
+				</ui-bind>
+			</div>
+
+			<div class="grid-2">
+				<div class="m">
+					<ui-component name="input" path="?.op_reqtoken" config="camouflage:1;placeholder:@(Enter a token)">@(Request token)</ui-component>
+				</div>
+				<div class="m">
+					<ui-component name="input" path="?.op_restoken" config="camouflage:1;placeholder:@(Enter a token)">@(Response token)</ui-component>
+				</div>
+			</div>
+			<div class="message message-alert">
+				<div class="b"><i class="ti ti-warning mr5"></i>@(Warning)</div>
+				@(You will be automatically logged out if you enter tokens for the OpenPlatform.)
+			</div>
+
+		</div>
+	</div>
+	<nav>
+		<ui-component name="validate" path="?">
+			<button name="submit" disabled><i class="ti ti-check-circle"></i>@(SUBMIT)</button>
+			<button name="cancel">@(Cancel)</button>
+		</ui-component>
+	</nav>
+</ui-component>
+
+<script>
+
+	PLUGIN(function(exports) {
+
+		exports.generate = function() {
+			exports.set('token', GUID(35), 'show');
+		};
+
+		exports.components = function(el) {
+			exports.set('components', el.attrd('href'));
+		};
+
+		exports.submit = function(hide) {
+			var model = exports.form;
+			exports.tapi('settings_save ERROR', model, function() {
+
+				hide();
+				document.title = model.name + ' (' + model.env + ')';
+				$('body').tclass('ui-dark', model.darkmode == true);
+				SET('common.env', model.env);
+
+				var win = $('.ui-parts-item');
+				for (var i = 0; i < win.length; i++) {
+					var w = $(win[i]).find('iframe')[0];
+					if (w) {
+						w = w.contentWindow;
+						w.postMessage(STRINGIFY({ TYPE: 'darkmode', value: model.darkmode === true }), '*');
+						w.postMessage(STRINGIFY({ TYPE: 'components', value: model.components }), '*');
+						w.postMessage(STRINGIFY({ TYPE: 'components2', value: model.components2 }), '*');
+					}
+				}
+
+			});
+		};
+
+	});
+
+</script>
