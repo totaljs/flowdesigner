@@ -12,3 +12,4 @@ __Query arguments__:
 
 - `socket=URL_ADDRESS_TO_FLOW_SOCKET` __required__
 - `language=en` __optional__ a language (not supported yet)
+- `hideclose=1` __optional__ hides a close button in the iframe element

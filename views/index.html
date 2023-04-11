@@ -72,8 +72,10 @@
 		common.page = '';
 		common.windows = [];
 
-		if (top !== W)
+		if (top !== W) {
 			common.iframe = true;
+			common.allowclose = NAV.query.hideclose !== '1';
+		}
 
 		common.socket = '@{query.socket}';
 		common.root = '@{#}';
