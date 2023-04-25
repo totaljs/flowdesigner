@@ -13,9 +13,6 @@
 
 		<div class="pull-right">
 			<a href="https://docs.totaljs.com/flow10/" title="@(Documentation: Total.js Platform)" target="_blank" class="special"><i class="ti ti-book"></i></a>
-			<!--
-			<button title="@(FlowStream information)" class="exec pull-right" data-exec="?/info"><i class="ti ti-info-circle color"></i></button>
-			-->
 		</div>
 
 		<div is="is-div" path="?.changed" config=".highlight button" class="apply-button">
@@ -31,10 +28,6 @@
 		</div>
 
 		<div>
-			<!--
-			<button disabled title="@(Undo)" is="is-button" path="?.undo" config="enabled:value && value.length" class="exec" data-exec="?/operation" data-type="undo"><i class="ti ti-undo"></i></button>
-			<button disabled title="@(Redo)" is="is-button" path="?.redo" config="enabled:value && value.length" class="exec" data-exec="?/operation" data-type="redo"><i class="ti ti-redo"></i></button>
-			-->
 			<button title="@(Zoom in)" class="exec" data-exec="?/operation" data-type="in"><i class="ti ti-search-plus"></i></button>
 			<button title="@(Zoom out)" class="exec" data-exec="?/operation" data-type="out"><i class="ti ti-search-minus"></i></button>
 			<button title="@(Zoom out/Zoom reset)" class="exec" data-exec="?/operation" data-type="out2"><i class="ti ti-search-dot"></i></button>
@@ -261,7 +254,6 @@
 
 		exports.components = function() {
 			SET('common.form', 'componentsform');
-			//enterprise.load(() => SET('common.form', 'componentsform'));
 		};
 
 		exports.find = function(el) {
@@ -1001,6 +993,29 @@
 			W.flowinstances.init(self.name, self, el);
 		};
 
+		var replacekeywords = function(str, keywords) {
+
+			var allowed = [' ', '\'', '"', '.', '>', '<', '=', '+', '-', ',', ';', '!', '\n', '\t', ' '];
+
+			for (var key in keywords) {
+				var index = 0;
+				while (true) {
+					index = str.indexOf(key, index);
+					if (index === -1)
+						break;
+					var b = str.charAt(index - 1);
+					var e = str.charAt(index + key.length);
+					if ((!b || allowed.includes(b)) && (!e || allowed.includes(e))) {
+						str = str.substring(0, index) + keywords[key] + str.substring(index + key.length);
+						index += keywords[key].length;
+					} else
+						index += key.length;
+				}
+			}
+
+			return str;
+		};
+
 		W.loadcomponenterror = function(e) {
 			var msg = (new Date()).format('[ts]') + ' - <b>{0} component</b>: failed client-side code execution - '.format(W.flowinstances.current) + Thelpers.encode(e + '');
 			var a = { type: 'error', body: msg };
@@ -1017,30 +1032,22 @@
 			var css = [];
 			var groups = {};
 			var checksums_tmp = {};
-			var regname = /NAME/g;
-			var regreplace = new RegExp('CLA' + 'SS', 'g');
-			var regstatus = /STATUS/g;
-			var regicon = /ICON/g;
-			var regconfig = /CONFIG/g;
-			var regtouch = /TOUCH/g;
-			var regid = /ID/g;
-			var reguid = /UID/g;
 			var colors = {};
+			var clsname = 'CLA' + 'SS';
 
 			for (var i = 0; i < response.length; i++) {
 				var com = response[i];
 				var name = com.name.slug().replace(/\-/g, '');
 
 				checksums_tmp[com.id] = HASH(com.html);
-
-				com.html = (com.html || '').replace(reguid, '{0}').replace(regid, com.id).replace(regicon, com.icon).replace(regname, com.name).replace(regtouch, 'flowinstances.instances.{0}').replace(regstatus, 'flow.status.{0}').replace(regconfig, 'flow.config.{0}').replace(regreplace, 'f-' + name);
+				com.html = replacekeywords(com.html || '', { UID: '{0}', ID: com.id, ICON: com.icon, NAME: com.name, TOUCH: 'flowinstances.instances.{0}', STATUS: 'flow.status.{0}', CONFIG: 'flow.config.{0}', [clsname]: 'f-' + name });
 
 				if (com.js) {
-					var tmp = com.js.replace(regid, com.id).replace(regreplace, name).replace(regicon, com.icon).replace(regname, com.name);
+					var tmp = replacekeywords(com.js, { ID: com.id, [clsname]: name, ICON: com.icon, NAME: com.name });
 					js.push('W.flowinstances.current=\'' + name + '\';W.flowinstances.checksum=\'' + HASH(tmp).toString(36) + '\';try{' + tmp + '}catch(e){W.loadcomponenterror(e)}');
 				}
 
-				com.css && css.push(com.css.replace(regid, com.id).replace(regreplace, 'f-' + name));
+				com.css && css.push(replacekeywords(com.css, { [clsname]: 'f-' + name }));
 				var g = com.group || 'Common';
 
 				com.groupclass = 'group_' + HASH(g).toString(36);
@@ -1112,12 +1119,11 @@
 				setTimeout(ASETTER('websocket/send', { TYPE: 'refresh' }), 1000);
 			}
 
-			/*
 			if (!init) {
 				init = true;
 				if (!response.length)
 					SET('common.form', 'newflow');
-			}*/
+			}
 
 		};
 
@@ -1286,7 +1292,7 @@
 					if (msg.name)
 						document.title = msg.name;
 
-					msg.proxyurl = msg.origin;
+					msg.proxyurl = location.origin;
 					var tmp = (msg.proxypath || '');
 					if (tmp)
 						msg.proxyurl += common.root && tmp.charAt(0) === '/' ? (common.root + tmp.substring(1)) : tmp;
@@ -1825,13 +1831,6 @@
 			CMD('flow.selected.clear');
 		};
 
-		exports.close = function() {
-			var data = {};
-			data.TYPE = 'close';
-			data.flow = 1;
-			W.parent.postMessage(STRINGIFY(data), '*');
-		};
-
 		exports.info = function() {
 
 			var model = exports.data;
@@ -1885,6 +1884,13 @@
 			SET('?.settings.settings_f' + flow.selected.component, {});
 			CHANGE('?.settings.settings_f' + flow.selected.component + '.*', true);
 			SETTER('notify/success', '@(Config reset.)');
+		};
+
+		exports.close = function() {
+			var data = {};
+			data.TYPE = 'close';
+			data.flow = 1;
+			W.parent.postMessage(STRINGIFY(data), '*');
 		};
 
 		FIND('flow', function(com) {
