@@ -233,6 +233,23 @@
 			SETTER('menu/show', opt);
 		};
 
+		exports.dropfiles = function(files) {
+			var arr = [];
+			for (var m of files)
+				arr.push(m);
+			arr.wait(function(file, next) {
+				var reader = new FileReader();
+				reader.onload = function() {
+					install_component(reader.result, function(id, name) {
+						id && SETTER('notify/success', '@(Installed: {0})'.format(name));
+						reader = null;
+						next();
+					})
+				};
+				reader.readAsText(file);
+			});
+		};
+
 		exports.nodes = function() {
 			var id = 'nodes';
 
@@ -357,10 +374,8 @@
 					if (!meta.readonly) {
 						opt.items.push({ id: 'clone', name: '@(Clone)', icon: 'ti ti-clone' });
 						single && opt.items.push({ id: 'edit', name: '@(Edit)', icon: 'ti ti-laptop-code' });
-						// opt.items.push({ id: 'copy', name: '@(Copy to clipboard)', icon: 'ti ti-copy' });
-						// opt.items.push({ id: 'copy2', name: '@(Copy source-code)', icon: 'ti ti-copy' });
-						// opt.items.push({ id: 'copycomponents', name: '@(Copy component(s))', icon: 'ti ti-copy' });
 						opt.items.push({ id: 'exportcomponents', name: '@(Copy)', icon: 'ti ti-copy' });
+						// opt.items.push({ id: 'download', name: '@(Download)', icon: 'ti ti-save' });
 						opt.items.push('-');
 					}
 				}
@@ -391,7 +406,14 @@
 
 					case 'copy':
 					case 'copy2':
+					case 'download':
 						SETTER('websocket/send', { TYPE: 'component_read', id: item.component, callback: ASETTER('message/response', function(response) {
+
+							if (opt.id === 'download') {
+								SETTER('filesaver/save', component.name + '.html', response.data);
+								return;
+							}
+
 							SETTER('clipboard/copy', opt.id === 'copy2' ? response.data : ENCRYPT({ body: response.data }, common.secret, 'component'));
 							SETTER('notify/success', '@(The component has been copied into the clipboard)');
 						})});
@@ -1521,6 +1543,7 @@
 				opt.items.push({ id: 'edit', name: '@(Edit)', icon: 'ti ti-laptop-code' });
 				opt.items.push({ id: 'clone', name: '@(Clone)', icon: 'ti ti-clone' });
 				opt.items.push({ id: 'copy2', name: '@(Copy source-code)', icon: 'ti ti-copy' });
+				// opt.items.push({ id: 'download', name: '@(Download)', icon: 'ti ti-save' });
 			}
 
 			if (!TYPES[component.type] && (!meta || meta.remove !== false)) {
@@ -1541,10 +1564,16 @@
 					case 'clone':
 					case 'copy':
 					case 'copy2':
+					case 'download':
 						SETTER('websocket/send', { TYPE: 'component_read', id: id, callback: ASETTER('message/response', function(response) {
 
 							response.body = response.data;
 							response.data = null;
+
+							if (item.id === 'download') {
+								SETTER('filesaver/save', component.name + '.html', response.data);
+								return;
+							}
 
 							if (item.id === 'copy' || item.id === 'copy2') {
 								SETTER('clipboard/copy', item.id === 'copy2' ? response.body : ENCRYPT({ body: response.body }, common.secret, 'component'));
@@ -1803,7 +1832,10 @@
 		}
 
 		function install_component(str, callback) {
+
+			var name;
 			var id;
+
 			var m = str.match(/exports\.id(\s=).*?;/);
 			if (m) {
 				try {
@@ -1814,8 +1846,19 @@
 			if (!id)
 				id = FUNC.makeid('c');
 
+			m = str.match(/exports\.name(\s=).*?;/);
+			if (m) {
+				try {
+					name = new Function('exports', 'return ' + m[0])({});
+				} catch (e) {
+					// Error
+					callback();
+					return;
+				}
+			}
+
 			SETTER('websocket/send', { TYPE: 'component_save', id: id, data: FUNC.rtrim(str), callback: function() {
-				callback(id);
+				callback(id, name);
 			}});
 		}
 
