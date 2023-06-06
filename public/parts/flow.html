@@ -64,7 +64,7 @@
 
 		<section data-type="main">
 			<ui-component name="viewbox" config="parent:auto;visibleX:true;visibleY:true;scrollbar:true;margin:0;scrollbarshadow:0;$id:flowviewbox">
-				<ui-component name="flow" path="?.data" config="width:10000;height:10000;markers:0;grid:16;horizontal:1;snapping:0;=curvedlines:common.curvedlines;steplines:1;infopath:?/refreshinfo;outputoffsetY:2;inputoffsetY:2;undopath:?.undo;redopath:?.redo;ondrop:?/drop;contextmenu:?/contextmenu;dblclick:?/settings;onmove:?/onmove;onpause:?/onpause;onconnect:?/onconnect;$assign:Designer;dblclickgroup:?/groupedit;animationlimit:500"></ui-component>
+				<ui-component name="flow" path="?.data" config="width:10000;height:10000;markers:0;grid:16;horizontal:1;snapping:0;=curvedlines:common.curvedlines;steplines:1;infopath:?/refreshinfo;outputoffsetY:2;inputoffsetY:2;undopath:?.undo;redopath:?.redo;ondrop:?/drop;contextmenu:?/contextmenu;dblclick:?/settings;onmove:?/onmove;onpause:?/onpause;onconnect:?/onconnect;$assign:Designer;dblclickgroup:?/groupedit;;animationlimit:300;animationlimitconnection:3"></ui-component>
 			</ui-component>
 		</section>
 
@@ -122,6 +122,7 @@
 <ui-component name="importer" path="common.form" config="if:groupform;url:@{#}/forms/group.html"></ui-component>
 <ui-component name="importer" path="common.form" config="if:newflow;url:@{#}/forms/new.html"></ui-component>
 <ui-component name="importer" path="common.form" config="if:noteform;url:@{#}/forms/note.html"></ui-component>
+<ui-component name="importer" path="common.form" config="if:publishform;url:@{#}/forms/publish.html"></ui-component>
 
 <script>
 
@@ -212,6 +213,7 @@
 
 			opt.items.push({ id: 'create', name: '@(Create component)', icon: 'ti ti-code' });
 			opt.items.push({ id: 'sources', name: '@(TMS sources)', icon: 'ti ti-code-branch' });
+			opt.items.push('-');
 			opt.items.push({ id: 'opensource', name: '@(Download components)', icon: 'ti ti-download' });
 
 			opt.callback = function(item) {
@@ -270,6 +272,7 @@
 		};
 
 		exports.components = function() {
+			// enterprise.load(() => SET('common.form', 'componentsform'));
 			SET('common.form', 'componentsform');
 		};
 
@@ -375,7 +378,10 @@
 						opt.items.push({ id: 'clone', name: '@(Clone)', icon: 'ti ti-clone' });
 						single && opt.items.push({ id: 'edit', name: '@(Edit)', icon: 'ti ti-laptop-code' });
 						opt.items.push({ id: 'exportcomponents', name: '@(Copy)', icon: 'ti ti-copy' });
-						// opt.items.push({ id: 'download', name: '@(Download)', icon: 'ti ti-save' });
+
+						// single && opt.items.push({ id: 'download', name: '@(Download)', icon: 'ti ti-save' });
+						single && opt.items.push({ id: 'publish', name: '@(Publish to the community)', icon: 'ti ti-upload' });
+
 						opt.items.push('-');
 					}
 				}
@@ -410,11 +416,11 @@
 						SETTER('websocket/send', { TYPE: 'component_read', id: item.component, callback: ASETTER('message/response', function(response) {
 
 							if (opt.id === 'download') {
-								SETTER('filesaver/save', component.name + '.html', response.data);
+								SETTER('filesaver/save', component.name + '.html', response.body);
 								return;
 							}
 
-							SETTER('clipboard/copy', opt.id === 'copy2' ? response.data : ENCRYPT({ body: response.data }, common.secret, 'component'));
+							SETTER('clipboard/copy', opt.id === 'copy2' ? response.data : ENCRYPT({ body: response.body }, common.secret, 'component'));
 							SETTER('notify/success', '@(The component has been copied into the clipboard)');
 						})});
 						break;
@@ -488,6 +494,17 @@
 							}
 							$(selector).attrd('color', opt.color).css({ stroke: opt.color });
 						})();
+						break;
+					case 'publish':
+						SETTER('websocket/send', { TYPE: 'component_read', id: item.component, callback: ASETTER('message/response', function(response) {
+							var data = {};
+							data.type = 'component';
+							data.name = item.name;
+							data.email = CACHE('email') || '@';
+							data.data = response.data;
+							SET('publishform @reset', data);
+							SET('common.form', 'publishform');
+						})});
 						break;
 				}
 			};
@@ -1017,7 +1034,7 @@
 
 		var replacekeywords = function(str, keywords) {
 
-			var allowed = [' ', '\'', '"', '.', '>', '<', '=', '+', '-', ',', ';', '!', '\n', '\t', ':', ' '];
+			var allowed = [' ', '\'', '"', '.', '>', '<', '=', '+', '-', ',', ';', '!', '\n', '\t', ':', ' ', '_'];
 
 			for (var key in keywords) {
 				var index = 0;
@@ -1544,6 +1561,7 @@
 				opt.items.push({ id: 'clone', name: '@(Clone)', icon: 'ti ti-clone' });
 				opt.items.push({ id: 'copy2', name: '@(Copy source-code)', icon: 'ti ti-copy' });
 				// opt.items.push({ id: 'download', name: '@(Download)', icon: 'ti ti-save' });
+				opt.items.push({ id: 'publish', name: '@(Publish to the community)', icon: 'ti ti-upload' });
 			}
 
 			if (!TYPES[component.type] && (!meta || meta.remove !== false)) {
@@ -1571,7 +1589,7 @@
 							response.data = null;
 
 							if (item.id === 'download') {
-								SETTER('filesaver/save', component.name + '.html', response.data);
+								SETTER('filesaver/save', component.name + '.html', response.body);
 								return;
 							}
 
@@ -1596,6 +1614,18 @@
 						break;
 					case 'copycomponent':
 						exports.copycomponents();
+						break;
+					case 'publish':
+						SETTER('websocket/send', { TYPE: 'component_read', id: id, callback: ASETTER('message/response', function(response) {
+							var data = {};
+							data.type = 'component';
+							data.name = component.name;
+							data.email = CACHE('email') || '@';
+							data.data = response.data;
+							SET('publishform @reset', data);
+							SET('common.form', 'publishform');
+						})});
+						break;
 				}
 			};
 			SETTER('menu/show', opt);
