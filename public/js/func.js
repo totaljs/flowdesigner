@@ -22,7 +22,7 @@ var TIDYUPWHITE = new RegExp(String.fromCharCode(160), 'g');
 		});
 	};
 
-	enterprise.edit = function() {
+	enterprise.edit = function(callback) {
 
 		if (!enterprise.loaded) {
 			IMPORT(endpoint + '/account/');
@@ -30,7 +30,7 @@ var TIDYUPWHITE = new RegExp(String.fromCharCode(160), 'g');
 		}
 
 		read(function(token) {
-			SET('enterpriseform @reset', { token: token });
+			SET('enterpriseform @reset', { token: token, callback: callback });
 			SET('enterprise.form', 'account');
 		});
 
@@ -40,6 +40,7 @@ var TIDYUPWHITE = new RegExp(String.fromCharCode(160), 'g');
 		read(function(token) {
 
 			SET('enterprise.token', token);
+
 			if (token) {
 				AJAX('GET {0}/account/verify/?token={1}'.format(endpoint, token), function(response) {
 					SET('enterprise.is', response.status === 'ok');
@@ -287,15 +288,16 @@ FUNC.makeid = function(type) {
 FUNC.trigger = function(el, data) {
 	if (data && data.constructor !== Object)
 		data = null;
+	var isel = el instanceof jQuery;
 	if (!data || typeof(data) !== 'object')
-		data = {};
+		data = isel ? { data: el.attrd('data') } : {};
 	setTimeout(function(id, data) {
 		if (id && flow.data[id] && flow.data[id].connected) {
 			data.TYPE = 'trigger';
 			data.id = id;
 			SETTER('websocket/send', data);
 		}
-	}, 10, el instanceof jQuery ? el.attrd2('id') : el, data);
+	}, 10, isel ? el.attrd2('id') : el, data);
 	return data;
 };
 
