@@ -421,3 +421,5 @@ body.ui-dark { background-color: #202020 !important; }
 .ui-dark .legend-action { color: #4b424d; }
 .ui-dark .legend-output { color: #455059; }
 .ui-dark .legend-trigger { color: #4e4939; }
+
+.noscrollbar { overflow-y: scroll !important; }
