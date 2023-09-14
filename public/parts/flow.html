@@ -278,7 +278,7 @@
 
 		exports.find = function(el) {
 			var id = ATTRD(el);
-			CMD('flow.find', id);
+			Designer.CMD('flow.find', id);
 		};
 
 		exports.clear = function() {
@@ -310,7 +310,7 @@
 			if (name !== 'zoom')
 				type = '';
 
-			CMD('flow.' + name, type, val);
+			Designer.CMD('flow.' + name, type, val);
 		};
 
 		exports.copyendpoint = function() {
@@ -460,7 +460,7 @@
 
 					case 'remove':
 
-						CMD('flow.selected.clear');
+						Designer.CMD('flow.selected.clear');
 
 						if (type === 'group')
 							SETTER('websocket/send', { TYPE: 'groups', data: flow.data.groups });
@@ -623,9 +623,9 @@
 						var template = fi.template || fi.meta; // due to backward compatibility
 						if (template) {
 							if (template.type === 'input')
-								inputs.push({ id: fi.id, name: fi.config.name });
+								inputs.push({ id: fi.id, name: fi.config.name || 'Input' });
 							else if (template.type === 'output')
-								outputs.push({ id: fi.id, name: fi.config.name });
+								outputs.push({ id: fi.id, name: fi.config.name || 'Output' });
 						}
 					}
 
@@ -774,7 +774,7 @@
 				$('.isnewbie').rclass('isnewbie');
 				SET('?.changed', false);
 				SETTER('websocket/send', { TYPE: 'save', data: output });
-				CMD('flow.reset');
+				Designer.CMD('flow.reset');
 			});
 
 		};
@@ -833,7 +833,7 @@
 			SET('?.changed', true);
 
 			for (var item of add)
-				CMD('flow.components.add', item);
+				Designer.CMD('flow.components.add', item);
 
 			setTimeout(function(add) {
 				for (var item of add)
@@ -860,7 +860,7 @@
 				obj.height = 400;
 				obj.name = '@(Group)';
 				obj.tab = flow.tab;
-				CMD('flow.groups.add', obj);
+				Designer.CMD('flow.groups.add', obj);
 				SETTER('websocket/send', { TYPE: 'groups', data: flow.data.groups });
 			} else {
 				var com = flow.components.findItem('id', id);
@@ -900,7 +900,7 @@
 				obj.tab = flow.tab;
 				SET('?.changed', true);
 				SET('?.config.' + obj.id, obj.config);
-				CMD('flow.components.add', obj);
+				Designer.CMD('flow.components.add', obj);
 			}
 
 		};
@@ -981,7 +981,7 @@
 			SET('?.changed', uninitializedcount > 0);
 			SET('?.ready', true, 500);
 			SET('?.instances', instances);
-			CMD('flow.refresh');
+			Designer.CMD('flow.refresh');
 			setTimeout(() => W.flowinstances.exec('*', 'redraw'), 200);
 		};
 
@@ -1361,7 +1361,7 @@
 					msg.traffic.priority.wait(function(key, next) {
 						var sleep = 500;
 						if (common.page === 'flow')
-							CMD('flow.traffic', key, { delay: 100, count: msg.traffic[key], speed: 3, limit: 30 });
+							Designer.CMD('flow.traffic', key, { delay: 100, count: msg.traffic[key], speed: 3, limit: 30 });
 						setTimeout(next, sleep);
 					});
 
@@ -1396,7 +1396,7 @@
 				case 'flow/status':
 					SET('flow.status.' + msg.id, msg.data || '');
 					W.flowinstances.exec(msg.id, 'status', msg.data);
-					setTimeout2('flow.refresh', ACMD('flow.refresh'), 500, 2 * 8);
+					setTimeout2('flow.refresh', ADesigner.CMD('flow.refresh'), 500, 2 * 8);
 					break;
 
 				case 'flow/redraw':
@@ -1419,7 +1419,7 @@
 					flow.config[msg.id] = msg.data.config;
 					UPD('flow.data', 'update');
 					UPD('flow.config.' + msg.id);
-					CMD('flow.refresh');
+					Designer.CMD('flow.refresh');
 					setTimeout(msg => W.flowinstances.exec(msg.id, 'redraw'), 100, msg);
 					break;
 
@@ -1427,7 +1427,7 @@
 					flow.data[msg.id].note = msg.data;
 					SET('flow.note.' + msg.id, msg.data);
 					if (common.page === 'flow')
-						setTimeout(ACMD('flow.refresh'), 100);
+						setTimeout(ADesigner.CMD('flow.refresh'), 100);
 					W.flowinstances.exec(msg.id, 'note', msg.data);
 					break;
 
@@ -1487,24 +1487,24 @@
 					item.y = msg.data.y;
 					item.element.closest('.component').css({ left: item.x, top: item.y });
 					W.flowinstances.exec(msg.id, 'move', msg.data);
-					CMD('flow.refresh');
+					Designer.CMD('flow.refresh');
 					break;
 
 				case 'flow/groups':
 					flow.data.groups = msg.data;
-					CMD('flow.refresh');
+					Designer.CMD('flow.refresh');
 					break;
 
 				case 'flow/variables':
 					SET('flow.variables', msg.data);
 					W.flowinstances.exec('*', 'variables', msg.data);
-					CMD('flow.refresh');
+					Designer.CMD('flow.refresh');
 					break;
 
 				case 'flow/variables2':
 					SET('flow.variables2', msg.data);
 					W.flowinstances.exec('*', 'variables2', msg.data);
-					CMD('flow.refresh');
+					Designer.CMD('flow.refresh');
 					break;
 
 				case 'flow/notify':
@@ -1908,7 +1908,7 @@
 		};
 
 		exports.selected_remove = function() {
-			CMD('flow.selected.clear');
+			Designer.CMD('flow.selected.clear');
 		};
 
 		exports.info = function() {
@@ -1975,7 +1975,7 @@
 
 		FIND('flow', function(com) {
 			var zoom = FUNC.pref_read('zoom');
-			CMD('flow.zoom', zoom);
+			Designer.CMD('flow.zoom', zoom);
 		});
 
 		FIND('#flowviewbox', function(com) {
@@ -2021,7 +2021,7 @@
 				UPD('flow.data.' + id + '.config');
 				SET('flow.config.' + id, config);
 				W.flowinstances.exec(instance.id, 'configure', config);
-				CMD('flow.refresh');
+				Designer.CMD('flow.refresh');
 			}
 		}
 	};
