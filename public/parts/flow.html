@@ -120,7 +120,6 @@
 <div id="flow_repo" class="hidden"></div>
 
 <ui-component name="importer" path="common.form" config="if:groupform;url:@{#}/forms/group.html"></ui-component>
-<ui-component name="importer" path="common.form" config="if:newflow;url:@{#}/forms/new.html"></ui-component>
 <ui-component name="importer" path="common.form" config="if:noteform;url:@{#}/forms/note.html"></ui-component>
 <ui-component name="importer" path="common.form" config="if:publishform;url:@{#}/forms/publish.html"></ui-component>
 
@@ -1165,11 +1164,8 @@
 				setTimeout(ASETTER('websocket/send', { TYPE: 'refresh' }), 1000);
 			}
 
-			if (!init) {
+			if (!init)
 				init = true;
-				if (!response.length)
-					SET('common.form', 'newflow');
-			}
 
 		};
 
