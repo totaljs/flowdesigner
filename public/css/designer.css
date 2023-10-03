@@ -2,7 +2,6 @@ html,body { padding: 0; margin: 0; overflow: hidden; }
 body { background-color: #F0F0F0; }
 .opbody { background-color: #F0F0F0 !important; }
 body.ui-dark { background-color: #202020 !important; }
-.radius { border-radius: var(--radius); }
 .ui-dark.opbody { background-color: #202020 !important; }
 .monospace { font-family: Menlo, Consolas, monospace; }
 .markdown-small { font-size: 14px; }
@@ -15,6 +14,8 @@ body.ui-dark { background-color: #202020 !important; }
 .markdown-tiny .markdown p { font-size: 12px !important; margin-bottom: 8px; }
 .markdown-tiny p code, .markdown-tiny li code, .markdown-tiny section code, .markdown-tiny blockquote code, .markdown-tiny td code, .markdown-tiny pre code { font-size: 11px; border: 0 !important; }
 .markdown-tiny .markdown-container > *:last-child { margin-bottom: 0 !important; }
+
+.closeiframe { margin-right: 10px; }
 
 :root {
 	--monospace: Menlo, Consolas, monospace;
@@ -32,7 +33,7 @@ body.ui-dark { background-color: #202020 !important; }
 .header button b i { font-size: 8px; }
 .header button.apply { padding: 0 15px 0 13px !important; font-weight: bold; }
 .header button.apply i { margin-right: 7px; color: #68B25B; }
-.header button.highlight { background-color: var(--color) !important; color: #FFF; }
+.header button.highlight { background-color: var(--color) !important; color: #FFF !important; }
 .header button.highlight i { color: #FFF !important; }
 .header button.paused { background-color: red !important; color: #FFF; }
 .header button.paused i { color: #FFF !important; }
@@ -149,7 +150,6 @@ body.ui-dark { background-color: #202020 !important; }
 .ui-flow .component.isnewbie { border-color: #68B25B; }
 .ui-flow .component.iserror { border-color: red; }
 .ui-flow .component-selected { border-color: var(--color) !important; }
-.ui-dark .ui-flow .component-selected { border-color: var(--color) !important; }
 .ui-flow-h summary { padding: 5px 8px 12px; font-size: 13px; font-style: normal; border-top: 3px solid rgba(0,0,0,0.1); display: block; position: relative; }
 .ui-flow-h summary > div { max-height: 200px; }
 .ui-flow-h summary .towindow { position: absolute; top: 5px; right: 5px; color: #000; cursor: pointer; }
@@ -169,7 +169,7 @@ body.ui-dark { background-color: #202020 !important; }
 .ui-flow .output[data-index="error"] { color: #E8483F; }
 
 .ui-dark .ui-flow .output-transform { background-color: rgba(255,255,255,0.04); }
-.ui-dark .ui-flow footer { border-top-color: rgba(62,62,62,0.9); }
+.ui-dark .ui-flow footer { border-top-color: rgba(40,40,40,0.5); }
 .ui-dark .ui-flow-h .input.connected { color: #FFF; }
 .ui-dark .ui-flow .component { box-shadow: 2px 2px 13px rgba(0,0,0,0.25); }
 .ui-dark .ui-flow-h summary .towindow { color: #D0D0D0; }
@@ -326,16 +326,14 @@ body.ui-dark { background-color: #202020 !important; }
 .listing-download figure { width: 25%; float: left; padding: 5px 8px; }
 .listing-download section { border: 1px solid #E0E0E0; background-color: #F8F8F8; padding: 5px; border-radius: var(--radius); cursor: pointer; }
 .listing-download section:hover { opacity: 0.8; }
+.listing-download .installed section { border-color: var(--color); background-color: var(--color); color: #FFF; font-weight: bold; }
+.listing-download .installed section .readme { color: #FFF; }
 .listing-download .icon { float: left; width: 18px; height: 18px; line-height: 18px; font-size: 11px; text-align: center; margin-right: 5px; color: #FFF; border-radius: 3px; }
 .listing-download .author { font-size: 11px; color: #777; }
 .listing-download .version { float: right; font-size: 11px; color: #777; margin: 10px 0 0; }
 .listing-download .name { font-size: 12px; }
 .listing-download .readme { font-size: 11px; float: right; cursor: pointer; color: #777; font-weight: normal; margin-top: 1px; }
 .listing-download .readme:hover { text-decoration: underline; }
-.listing-download .enterprise > section { border-left: 3px solid #EA706B !important; }
-.listing-download .community > section { border-left: 3px solid #62C9CA !important; background-color: rgba(98,201,202,0.1); }
-.listing-download .installed section { border-color: var(--color); background-color: var(--color); color: #FFF; font-weight: bold; }
-.listing-download .installed section .readme { color: #FFF; }
 
 .ui-dark .listing-download section { border-color: #404040; background-color: #303030; }
 .ui-dark .listing-download .installed section { background-color: var(--color); border-color: var(--color); }
