@@ -1343,7 +1343,7 @@
 					if (msg.name)
 						document.title = msg.name;
 
-					msg.proxyurl = location.origin;
+					msg.proxyurl = msg.origin || location.origin;
 					var tmp = (msg.proxypath || '');
 					if (tmp)
 						msg.proxyurl += common.root && tmp.charAt(0) === '/' ? (common.root + tmp.substring(1)) : tmp;
@@ -1408,7 +1408,7 @@
 				case 'flow/status':
 					SET('flow.status.' + msg.id, msg.data || '');
 					W.flowinstances.exec(msg.id, 'status', msg.data);
-					setTimeout2('flow.refresh', ADesigner.CMD('flow.refresh'), 500, 2 * 8);
+					setTimeout2('flow.refresh', () => Designer.CMD('flow.refresh'), 500, 2 * 8);
 					break;
 
 				case 'flow/redraw':
@@ -1439,7 +1439,7 @@
 					flow.data[msg.id].note = msg.data;
 					SET('flow.note.' + msg.id, msg.data);
 					if (common.page === 'flow')
-						setTimeout(ADesigner.CMD('flow.refresh'), 100);
+						setTimeout(Designer.CMD('flow.refresh'), 100);
 					W.flowinstances.exec(msg.id, 'note', msg.data);
 					break;
 
