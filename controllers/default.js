@@ -7,5 +7,5 @@ function index() {
 	if ($.query.socket)
 		$.view('index');
 	else
-		$.redirect('https://flowstream.totaljs.com');
+		$.redirect('https://floweditor.totaljs.com');
 }
