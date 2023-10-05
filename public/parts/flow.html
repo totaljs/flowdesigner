@@ -1227,6 +1227,7 @@
 			opt.items.push({ id: 'nodes', name: '@(Active nodes)', icon: 'ti ti-list' });
 			opt.items.push({ id: 'version', name: '@(Version)', icon: 'ti ti-info-circle' });
 			opt.items.push('-');
+			opt.items.push({ id: 'download', name: '@(Download)', icon: 'ti ti-download' });
 			opt.items.push({ id: 'export', name: '@(Export)', icon: 'ti ti-file-export' });
 			opt.items.push({ id: 'exportascomponent', name: '@(Export to component)', icon: 'ti ti-plug' });
 			opt.items.push({ id: 'exportasbase64', name: '@(Export to BASE64)', icon: 'ti ti-plug' });
@@ -1294,10 +1295,16 @@
 						exports.importascomponent();
 						break;
 					case 'export':
-						SETTER('websocket/send', { TYPE: 'export', callback: ASETTER('message/response', function(response) {
+					case 'download':
+						SETTER('websocket/send', { TYPE: 'export', callback: ERROR(function(response) {
 							delete response.data.origin;
-							navigator.clipboard.writeText(JSON.stringify(response.data, null, '\t')).catch(err => console.error(err));
-							SETTER('notify/success', '@(The FlowStream has been copied into the clipboard)');
+							var data = JSON.stringify(response.data, null, '\t');
+							if (item.id === 'download') {
+								SETTER('filesaver/save', flow.head.name + '.json', data, 'json');
+							} else {
+								navigator.clipboard.writeText(data).catch(err => console.error(err));
+								SETTER('notify/success', '@(The FlowStream has been copied into the clipboard)');
+							}
 						})});
 						break;
 					case 'restart':
