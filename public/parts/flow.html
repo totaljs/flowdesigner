@@ -24,7 +24,6 @@
 			<button title="@(Add)" class="exec green" data-exec="?/add"><i class="ti ti-plus-circle"></i></button>
 			<button title="@(Variables)" class="exec" data-exec="?/variables"><i class="ti ti-variables"></i></button>
 			<button title="@(Console)" class="exec" data-exec="?/console" is="is-button" path="common.logs.errors.items.length" config=".red"><i class="ti ti-bug"></i></button>
-			<button title="@(Reset)" class="exec hidden" data-exec="?/reset" is="is-button" path="common.logs.errors.items.length" config="show"><i class="ti ti-clean"></i></button>
 		</div>
 
 		<div>
@@ -2096,6 +2095,28 @@
 	Thelpers.url = function(val) {
 		var index = val.indexOf('/', 10);
 		return index === -1 ? val : val.substring(0, index);
+	};
+
+	FUNC.trigger = function(el, data) {
+
+		if (flow.changed) {
+			SETTER('message/warning', '@(While the FlowStream contains unapplied changes, this action is not permitted.)');
+			return;
+		}
+
+		if (data && data.constructor !== Object)
+			data = null;
+		var isel = el instanceof jQuery;
+		if (!data || typeof(data) !== 'object')
+			data = isel ? { data: el.attrd('data') } : {};
+		setTimeout(function(id, data) {
+			if (id && flow.data[id] && flow.data[id].connected) {
+				data.TYPE = 'trigger';
+				data.id = id;
+				SETTER('websocket/send', data);
+			}
+		}, 10, isel ? el.attrd2('id') : el, data);
+		return data;
 	};
 
 </script>
