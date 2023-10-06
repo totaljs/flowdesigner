@@ -590,7 +590,7 @@
 				settings_current = instance;
 				$('#flow_settings').rclass('invisible', 1000);
 				SETTER('#settingsvalidation/setPath', path);
-				SET('flow.settings.{0} @reset'.format(id), config);
+				SET('flow.settings.{0} @default'.format(id), config);
 				SET('common.form', 'settings');
 			};
 
