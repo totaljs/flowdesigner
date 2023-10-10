@@ -19,7 +19,8 @@ function socket() {
 	$.autodestroy();
 
 	$.on('open', function(client) {
-		if (client.query.flow || client.query.flowstream) {
+		client.isflowstream = client.headers['user-agent'] === 'Total.js/v4' || client.headers['user-agent'] === 'Total.js/v5';
+		if (client.isflowstream) {
 			flow = client;
 			if ($.online > 1)
 				flow.send({ TYPE: 'flow' });
@@ -28,8 +29,10 @@ function socket() {
 	});
 
 	$.on('close', function(client) {
-		if (client.query.flow || client.query.flowstream)
+		if (client.isflowstream) {
 			flow = null;
+			$.close();
+		}
 	});
 
 	$.on('message', function(client, msg) {
