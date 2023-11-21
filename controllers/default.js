@@ -3,17 +3,15 @@ exports.install = function() {
 	ROUTE('SOCKET /{id}/', socket, 1024 * 10);
 };
 
-function index() {
-	var $ = this;
+function index($) {
 	if ($.query.socket)
 		$.view('index');
 	else
 		$.redirect('https://floweditor.totaljs.com');
 }
 
-function socket() {
+function socket($) {
 
-	var $ = this;
 	var flow = null;
 
 	$.autodestroy();
