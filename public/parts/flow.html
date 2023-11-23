@@ -391,7 +391,6 @@
 						opt.items.push({ id: 'exportcomponents', name: '@(Copy)', icon: 'ti ti-copy' });
 						// single && opt.items.push({ id: 'download', name: '@(Download)', icon: 'ti ti-save' });
 						single && opt.items.push({ id: 'publish', name: '@(Publish to the community)', icon: 'ti ti-upload' });
-
 						if (meta.remove !== false)
 							opt.items.push('-');
 					}
@@ -411,7 +410,7 @@
 				opt.items.push({ name: '@(Color)', icon: 'ti ti-paint-brush colorize', children: submenu, classname: 'b' });
 			}
 
-			if (!component || (!meta.readonly && meta.remove !== false))
+			if (!component || meta.remove !== false)
 				opt.items.push({ id: 'remove', name: '@(Remove)', icon: 'ti ti-remove red' });
 
 			opt.callback = function(opt) {
