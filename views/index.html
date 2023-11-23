@@ -140,6 +140,11 @@
 			is && e && e.preventDefault();
 		}
 
+		SETTER(true, 'shortcuts/register', 'F1', function() {
+			if (W.parent !== W)
+				W.parent.postMessage(STRINGIFY({ TYPE: 'F1', SOURCE: 'flow', flow: 1 }), '*');
+		}, true);
+
 		SETTER(true, 'shortcuts/register', 'CMD+F, CTRL+F', function(e) {
 			if (common.page === 'flow' && !common.form && !common.form2) {
 				$('.ui-layout-left').find('input').focus();
