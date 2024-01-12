@@ -35,4 +35,4 @@ options.servicemode = process.argv.indexOf('--servicemode', 1) !== -1;
 // options.logs = 'isolated';
 
 var type = process.argv.indexOf('--release', 1) !== -1 ? 'release' : 'debug';
-require('total4/' + type)(options);
+require('total5/' + type)(options);
