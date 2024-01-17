@@ -19,6 +19,7 @@
 	<ui-component name="locale" config="requests:1;language:@{query.language}"></ui-component>
 	<ui-component name="windows" path="common.windows" config="zindex:50"></ui-component>
 
+	<ui-component name="LAZY prompt" config="cancel:@(Cancel);submit:@(OK)"></ui-component>
 	<ui-component name="LAZY menu" config="style:2"></ui-component>
 	<ui-component name="LAZY approve" config="cancel:@(Cancel)"></ui-component>
 	<ui-component name="LAZY message" config="style:2"></ui-component>
@@ -28,7 +29,6 @@
 	<ui-component name="LAZY clipboard"></ui-component>
 	<ui-component name="LAZY icons" config="list:/icons-db.html"></ui-component>
 	<ui-component name="LAZY timepicker"></ui-component>
-	<ui-component name="LAZY datepicker"></ui-component>
 	<ui-component name="LAZY directory" config="placeholder:@(Search)"></ui-component>
 	<ui-component name="LAZY colorpicker"></ui-component>
 	<ui-component name="LAZY filereader"></ui-component>
@@ -44,6 +44,7 @@
 	<ui-component name="shortcuts"></ui-component>
 	<ui-component name="loading"></ui-component>
 	<ui-component name="console" path="common.console" config="datasource:common.logs;clear:flow/reset"></ui-component>
+	<ui-component name="datepicker" config="today:@(Today);days:@(Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday);clear:@(Clear);months:@(January,February,March,April,May,Juny,July,August,September,October,November,December)"></ui-component>
 
 	<ui-component name="dropfiles" path="null" config="exec:flow/dropfiles" class="hidden">
 		@(Drag &amp; Drop files here)
@@ -76,6 +77,9 @@
 		common.language = '@{query.language}';
 		common.page = '';
 		common.windows = [];
+
+		if (NAV.query.color)
+			APPEARANCE({ color: NAV.query.color });
 
 		if (top !== W) {
 			common.iframe = true;
