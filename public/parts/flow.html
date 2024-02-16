@@ -1479,7 +1479,7 @@
 					flow.data[msg.id].note = msg.data;
 					SET('flow.note.' + msg.id, msg.data);
 					if (common.page === 'flow')
-						setTimeout(Designer.CMD('flow.refresh'), 100);
+						setTimeout(() => Designer.CMD('flow.refresh'), 100);
 					W.flowinstances.exec(msg.id, 'note', msg.data);
 					break;
 
